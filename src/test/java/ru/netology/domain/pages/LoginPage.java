@@ -3,8 +3,8 @@ package ru.netology.domain.pages;
 import com.codeborne.selenide.SelenideElement;
 import lombok.Value;
 import ru.netology.domain.data.DataHelper;
+import ru.netology.domain.pages.exceptions.LoginPageError;
 
-import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Selenide.$;
 
 @Value
@@ -15,21 +15,19 @@ public class LoginPage {
     private SelenideElement loginButton = $("[data-test-id='action-login']");
     private SelenideElement errorMassage = $("[data-test-id='error-notification']");
 
-    public void ErrorElement() {
-        errorMassage.shouldHave(text(" Ошибка! Неверно указан логин или пароль"));
+    public void loginAs(String login, String password) {
+        loginField.setValue(login);
+        passwordField.setValue(password);
+        loginButton.click();
     }
 
-
     public VerificationPage validLogin(DataHelper.AuthInfo info) {
-        loginField.setValue(info.getLogin());
-        passwordField.setValue(info.getPassword());
-        loginButton.click();
+        loginAs(info.getLogin(), info.getPassword());
         return new VerificationPage();
     }
 
-    public void invalidLogin(DataHelper.AuthInfo info) {
-        loginField.setValue(info.getLogin());
-        passwordField.setValue(info.getPassword());
-        loginButton.click();
+    public LoginPageError invalidLogin(DataHelper.AuthInfo info) {
+        loginAs(info.getLogin(), info.getPassword());
+        return new LoginPageError();
     }
 }

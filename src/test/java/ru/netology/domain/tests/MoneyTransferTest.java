@@ -2,10 +2,7 @@ package ru.netology.domain.tests;
 
 import com.codeborne.selenide.Configuration;
 import lombok.val;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import ru.netology.domain.data.DataHelper;
 import ru.netology.domain.pages.DashboardPage;
 import ru.netology.domain.pages.LoginPage;
@@ -14,9 +11,10 @@ import ru.netology.domain.pages.TransferPage;
 import static com.codeborne.selenide.Selenide.open;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MoneyTransferTest {
     @Nested
-    @DisplayName("Login & Verification")
+    @DisplayName("Negative Login & Verification")
     class LoginAndVerification {
         @BeforeEach
         void setup() {
@@ -24,25 +22,8 @@ public class MoneyTransferTest {
             open("http://localhost:9999");
         }
 
-        @Test
-        void shouldLoginByHappyPath() {
-            var loginPage = new LoginPage();
-            var autoInfo = DataHelper.getAuthInfo();
-            var verificationPage = loginPage.validLogin(autoInfo);
-            var verificationCode = DataHelper.getVerificationCodeFor(autoInfo);
-            verificationPage.validVerify(verificationCode);
-        }
-
-        @Test
-        void shouldLoginWithOther() {
-            var loginPage = new LoginPage();
-            var authInfo = DataHelper.getOtherAuthInfo();
-            var verificationPage = loginPage.validLogin(authInfo);
-            var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
-            verificationPage.validVerify(verificationCode);
-        }
-
-        @Test
+        @Order(9)
+        @RepeatedTest(3)
         void shouldLoginWithWrongVerificationCode() {
             var loginPage = new LoginPage();
             var autoInfo = DataHelper.getAuthInfo();
@@ -51,12 +32,22 @@ public class MoneyTransferTest {
             verificationPage.invalidVerify(verificationCode);
         }
 
+        @Order(10)
+        @Test()
+        void shouldLoginWithWrongVerificationCodeMoreThan3TimesInARow() {
+            var loginPage = new LoginPage();
+            var autoInfo = DataHelper.getAuthInfo();
+            var verificationPage = loginPage.validLogin(autoInfo);
+            var verificationCode = DataHelper.getWrongVerificationCodeFor(autoInfo);
+            verificationPage.invalidVerifyMore3Times(verificationCode);
+        }
+
+        @Order(8)
         @Test
         void shouldSetWrongLogin() {
             var loginPage = new LoginPage();
             var autoInfo = DataHelper.getWrongAuthInfo();
             loginPage.invalidLogin(autoInfo);
-            loginPage.ErrorElement();
         }
     }
 
@@ -74,6 +65,7 @@ public class MoneyTransferTest {
             verificationPage.validVerify(verificationCode);
         }
 
+        @Order(1)
         @Test
         void shouldTransferMoneyFromSecondToFirst() {
             var dashboardPage = new DashboardPage();
@@ -89,6 +81,7 @@ public class MoneyTransferTest {
             assertEquals(secondBalanceCardResult, dashboardPage.getSecondCardBalance());
         }
 
+        @Order(2)
         @Test
         void shouldTransferMoneyFromFirstToSecond() {
             var dashboardPage = new DashboardPage();
@@ -104,6 +97,7 @@ public class MoneyTransferTest {
             assertEquals(secondBalanceCardResult, dashboardPage.getSecondCardBalance());
         }
 
+        @Order(3)
         @Test
         void shouldTransferMoreThanAvailable() {
             var dashboardPage = new DashboardPage();
@@ -112,13 +106,14 @@ public class MoneyTransferTest {
             int secondBalanceCard = dashboardPage.getSecondCardBalance();
             val transferPage = new TransferPage();
             dashboardPage.topUpSecondCard();
-            transferPage.validTransfer(amount, DataHelper.getFirstCardNumber());
-            val firstBalanceCardResult = firstBalanceCard - amount;
-            val secondBalanceCardResult = secondBalanceCard + amount;
+            transferPage.excessTransfer(amount, DataHelper.getFirstCardNumber());
+            val firstBalanceCardResult = firstBalanceCard;
+            val secondBalanceCardResult = secondBalanceCard;
             assertEquals(firstBalanceCardResult, dashboardPage.getFirstCardBalance());
             assertEquals(secondBalanceCardResult, dashboardPage.getSecondCardBalance());
         }
 
+        @Order(4)
         @Test
         void shouldTransferMoneyFromNonExistentCard() {
             var dashboardPage = new DashboardPage();
@@ -130,6 +125,7 @@ public class MoneyTransferTest {
             transferPage.invalidTransfer(amount, DataHelper.getNonExistentCardNumber());
         }
 
+        @Order(5)
         @Test
         void shouldTransferNegativeAmount() {
             var dashboardPage = new DashboardPage();
@@ -145,6 +141,7 @@ public class MoneyTransferTest {
             assertEquals(secondBalanceCardResult, dashboardPage.getSecondCardBalance());
         }
 
+        @Order(6)
         @Test
         void shouldTransferDecimalAmount() {
             var dashboardPage = new DashboardPage();
@@ -160,6 +157,7 @@ public class MoneyTransferTest {
             assertEquals(secondBalanceCardResult, dashboardPage.getSecondCardBalance());
         }
 
+        @Order(7)
         @Test
         void shouldTransferOnTheSameCard() {
             var dashboardPage = new DashboardPage();
@@ -176,3 +174,4 @@ public class MoneyTransferTest {
         }
     }
 }
+

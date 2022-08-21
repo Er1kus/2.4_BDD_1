@@ -2,8 +2,9 @@ package ru.netology.domain.pages;
 
 import com.codeborne.selenide.SelenideElement;
 import ru.netology.domain.data.DataHelper;
+import ru.netology.domain.pages.exceptions.TransferPageError;
+import ru.netology.domain.pages.exceptions.TransferPageError2;
 
-import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
 
@@ -20,19 +21,25 @@ public class TransferPage {
         heading.shouldBe(visible);
     }
 
-    public DashboardPage validTransfer(int amount, DataHelper.TransferCode code) {
+    public void transferAs(int amount, String number) {
         sumForTransfer.setValue(String.valueOf(amount));
-        fromCardNumber.setValue(code.getNumber());
+        fromCardNumber.setValue(number);
         transferButton.click();
+    }
+
+    public DashboardPage validTransfer(int amount, DataHelper.TransferCode code) {
+        transferAs(Integer.parseInt(String.valueOf(amount)), code.getNumber());
         return new DashboardPage();
     }
 
-    public void invalidTransfer(int amount, DataHelper.TransferCode code) {
-        sumForTransfer.setValue(String.valueOf(amount));
-        fromCardNumber.setValue(code.getNumber());
-        transferButton.click();
-        errorPopup.shouldHave(text("Ошибка " +
-                "Ошибка! Произошла ошибка"));
+    public TransferPageError invalidTransfer(int amount, DataHelper.TransferCode code) {
+        transferAs(Integer.parseInt(String.valueOf(amount)), code.getNumber());
+        return new TransferPageError();
+    }
+
+    public TransferPageError2 excessTransfer(int amount, DataHelper.TransferCode code) {
+        transferAs(Integer.parseInt(String.valueOf(amount)), code.getNumber());
+        return new TransferPageError2();
     }
 
     public DashboardPage decimalTransfer(double amount, DataHelper.TransferCode code) {

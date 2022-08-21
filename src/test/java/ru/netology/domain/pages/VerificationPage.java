@@ -2,6 +2,8 @@ package ru.netology.domain.pages;
 
 import com.codeborne.selenide.SelenideElement;
 import ru.netology.domain.data.DataHelper;
+import ru.netology.domain.pages.exceptions.VerificationPageError;
+import ru.netology.domain.pages.exceptions.VerificationPageError2;
 
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
@@ -15,15 +17,23 @@ public class VerificationPage {
         codeField.shouldBe(visible);
     }
 
-    public DashboardPage validVerify(DataHelper.VerificationCode verificationCode) {
-        codeField.setValue(verificationCode.getCode());
+    public void verifyAs(String code) {
+        codeField.setValue(code);
         verifyButton.click();
+    }
+
+    public DashboardPage validVerify(DataHelper.VerificationCode verificationCode) {
+        verifyAs(verificationCode.getCode());
         return new DashboardPage();
     }
 
-    public void invalidVerify(DataHelper.VerificationCode verificationCode) {
-        codeField.setValue(verificationCode.getCode());
-        verifyButton.click();
-        errorMassage.shouldBe(visible);
+    public VerificationPageError invalidVerify(DataHelper.VerificationCode verificationCode) {
+        verifyAs(verificationCode.getCode());
+        return new VerificationPageError();
+    }
+
+    public VerificationPageError2 invalidVerifyMore3Times(DataHelper.VerificationCode verificationCode) {
+        verifyAs(verificationCode.getCode());
+        return new VerificationPageError2();
     }
 }
