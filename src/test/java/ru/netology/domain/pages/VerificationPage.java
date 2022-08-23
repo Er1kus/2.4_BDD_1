@@ -2,16 +2,16 @@ package ru.netology.domain.pages;
 
 import com.codeborne.selenide.SelenideElement;
 import ru.netology.domain.data.DataHelper;
-import ru.netology.domain.pages.exceptions.VerificationPageError;
-import ru.netology.domain.pages.exceptions.VerificationPageError2;
 
+import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
 
 public class VerificationPage {
     private SelenideElement codeField = $("[data-test-id='code'] input");
     private SelenideElement verifyButton = $("[data-test-id='action-verify']");
-    private SelenideElement errorMassage = $("[data-test-id='error-notification']");
+    private SelenideElement verificationErrorMessage = $("[data-test-id='error-notification']");
+    private SelenideElement manyTriesErrorMessage = $("[data-test-id='error-notification']");
 
     public VerificationPage() {
         codeField.shouldBe(visible);
@@ -27,13 +27,13 @@ public class VerificationPage {
         return new DashboardPage();
     }
 
-    public VerificationPageError invalidVerify(DataHelper.VerificationCode verificationCode) {
+    public void invalidVerify(DataHelper.VerificationCode verificationCode) {
         verifyAs(verificationCode.getCode());
-        return new VerificationPageError();
+        verificationErrorMessage.shouldHave(text("Ошибка " + "Ошибка! Неверно указан код! Попробуйте ещё раз."));
     }
 
-    public VerificationPageError2 invalidVerifyMore3Times(DataHelper.VerificationCode verificationCode) {
+    public void invalidVerifyMore3Times(DataHelper.VerificationCode verificationCode) {
         verifyAs(verificationCode.getCode());
-        return new VerificationPageError2();
+        manyTriesErrorMessage.shouldHave(text("Ошибка " + "Ошибка! Превышено количество попыток ввода кода!"));
     }
 }
